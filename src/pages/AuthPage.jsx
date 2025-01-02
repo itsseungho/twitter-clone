@@ -8,7 +8,6 @@ export default function AuthPage() {
     const loginImage = "https://sig1.co/img-twitter-1";
     const url =
         "https://auth-back-end-sigmaschooltech.sigma-school-full-stack.repl.co";
-    // values: null (no modal show), "login", "signup"
     const [modalShow, setModalShow] = useState(null);
     const handleShowSignUp = () => setModalShow("signup");
     const handleShowLogin = () => setModalShow("login");
@@ -34,7 +33,6 @@ export default function AuthPage() {
         e.preventDefault();
         try {
             const res = await axios.post(`${url}/login`, { username, password });
-            // res.data is not empty and auth is true, and token is not empty
             if (res.data && res.data.auth === true && res.data.token) {
                 setAuthToken(res.data.token);
                 console.log("login was succesful, token saved");
