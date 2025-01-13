@@ -1,34 +1,50 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Button, Col, Image, Row } from "react-bootstrap";
 import { useDispatch } from "react-redux";
-import { likePost, removeLikeFromPost } from "../features/posts/postsSlice";
-import { AuthContext } from "./AuthProvider";
+import {
+    deletePost,
+    likePost,
+    removeLikeFromPost,
+} from "../features/posts/postsSlice";
+import { auth } from "../firebase";
+import UpdatePostModal from "./UpdatePostModal";
 
 export default function ProfilePostCard({ post }) {
-    const { content, id: postId } = post;
-    const [likes, setLikes] = useState(post.likes || []);
-    const dispatch = useDispatch();
-    const { currentUser } = useContext(AuthContext);
-    const userId = currentUser.uid;
+    const { content, id: postId, imageUrl } = post;
+    // const content = post.content
+    // const postId = post.id
 
-    // user has liked the post if their id is in the likes array
+    const [likes, setLikes] = useState(post.likes || []);
+    // const [likes, setLikes] = useState(null || []);
+    // const [likes, setLikes] = useState([]);
+
+    const dispatch = useDispatch();
+    const userId = auth.currentUser.uid;
+
     const isLiked = likes.includes(userId);
 
     const pic =
         "https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg";
 
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
+
+    const handleShowUpdateModal = () => setShowUpdateModal(true);
+    const handleCloseUpdateModal = () => setShowUpdateModal(false);
+
     const handleLike = () => (isLiked ? removeFromLikes() : addToLikes());
 
-    // add userID to likes array
     const addToLikes = () => {
         setLikes([...likes, userId]);
         dispatch(likePost({ userId, postId }));
     };
 
-    // remove userID from likes array and update the backend
     const removeFromLikes = () => {
         setLikes(likes.filter((id) => id !== userId));
         dispatch(removeLikeFromPost({ userId, postId }));
+    };
+
+    const handleDelete = () => {
+        dispatch(deletePost({ userId, postId }));
     };
 
     return (
@@ -46,6 +62,7 @@ export default function ProfilePostCard({ post }) {
                 <strong>Haris</strong>
                 <span> @haris.samingnan · Apr 16</span>
                 <p>{content}</p>
+                <Image src={imageUrl} style={{ width: 150 }} />
                 <div className="d-flex justify-content-between">
                     <Button variant="light">
                         <i className="bi bi-chat"></i>
@@ -65,8 +82,20 @@ export default function ProfilePostCard({ post }) {
                         <i className="bi bi-graph-up"></i> 61
                     </Button>
                     <Button variant="light">
-                        <i className="bi bi-upload"></i>
+                        <i
+                            className="bi bi-pencil-square"
+                            onClick={handleShowUpdateModal}
+                        ></i>
                     </Button>
+                    <Button variant="light" onClick={handleDelete}>
+                        <i className="bi bi-trash"></i>
+                    </Button>
+                    <UpdatePostModal
+                        show={showUpdateModal}
+                        handleClose={handleCloseUpdateModal}
+                        postId={postId}
+                        originalPostContent={content}
+                    />
                 </div>
             </Col>
         </Row>
